@@ -1,4 +1,4 @@
-"""Application Config"""
+"""Application Config."""
 
 import os
 
