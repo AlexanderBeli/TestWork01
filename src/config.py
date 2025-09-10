@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     REDIS_PORT: str = "6379" if TESTING_FLAG else os.getenv("REDIS_PORT")
     REDIS_DB: str = "0" if TESTING_FLAG else os.getenv("REDIS_DB")
     REDIS_PASSWORD: str = "" if TESTING_FLAG else os.getenv("REDIS_PASSWORD")
-    REDIS_SSL: bool = False if TESTING_FLAG else True
+    REDIS_SSL: bool = not TESTING_FLAG
 
     MONGODB_URL: str = "mongodb://mongodb:27017" if TESTING_FLAG else os.getenv("MONGODB_URL")
     MONGODB_NAME: str = "testdb" if TESTING_FLAG else os.getenv("MONGODB_NAME")
