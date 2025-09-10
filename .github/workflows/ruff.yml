@@ -1,0 +1,85 @@
+name: Ruff and Bandit Linting
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ruff and Bandit
+        run: pip install ruff bandit
+
+      - name: Run Ruff Format
+        run: ruff format --line-length 120 .
+
+      - name: Run Ruff Critical Checks (Blocking)
+        run: ruff check --fix --select F,W,I,C4,SIM,ARG,FLY,LOG,PERF,COM --line-length 120 .
+
+      - name: Run Ruff Style Checks (Warnings only)
+        run: |
+          echo "::notice::Running style and annotation checks (warnings only)"
+          ruff check --select E501,ANN --line-length 120 --output-format=github . || echo "Style issues found"
+        continue-on-error: true
+
+      - name: Run Ruff Quality Checks (Warnings only)
+        run: |
+          echo "::notice::Running code quality checks (warnings only)"
+          ruff check --select B,A,RET,SLF,PTH,TD,ERA,PL,RSE --line-length 120 --output-format=github . || echo "Quality issues found"
+        continue-on-error: true
+
+      - name: Check for Python files
+        run: |
+          find . -name "*.py" > python_files.txt
+          if [ -s python_files.txt ]; then
+            echo "Python files found:"
+            cat python_files.txt
+          else
+            echo "No Python files found in the repository."
+          fi
+
+      - name: Run Bandit Security Check
+        run: |
+          if [ -s python_files.txt ]; then
+          echo "::notice::Running Bandit security analysis"
+          # Run Bandit with custom format and process output for annotations
+          bandit -r . --format custom --msg-template '{relpath}:{line}: {severity}: {test_id}[bandit]: {msg}' | while IFS= read -r line; do
+              # Skip empty lines or non-matching lines
+              if [[ $line =~ ^([^:]+:[0-9]+):[[:space:]]*(LOW|MEDIUM|HIGH):[[:space:]]*(.*)$ ]]; then
+              file_line="${BASH_REMATCH[1]}"
+              severity="${BASH_REMATCH[2]}"
+              message="${BASH_REMATCH[3]}"
+              
+              case $severity in
+                  HIGH)
+                  echo "::error file=$file_line::$message"
+                  ;;
+                  MEDIUM)
+                  echo "::warning file=$file_line::$message"
+                  ;;
+                  LOW)
+                  echo "::notice file=$file_line::$message"
+                  ;;
+              esac
+              else
+              # Log non-matching lines as debug (optional)
+              echo "::debug::$line"
+              fi
+          done || echo "Bandit completed analysis"
+          else
+          echo "No Python files found, skipping Bandit."
+          fi
