@@ -1,3 +1,5 @@
+"""Application Entrypoint."""
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Lifespan."""
     try:
         client.admin.command("ping")
         logging.info("✅ MongoDB connection verified")
