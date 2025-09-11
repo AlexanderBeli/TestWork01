@@ -27,12 +27,12 @@ async def parse_quotes_task(_db: Database = Depends(get_db)):
         logger.error(f"MongoDB connection failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service Unavailable: Database connection failed."
-        )
+        ) from e
     except Exception as e:
         logger.error(f"Failed to start Celery task: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error: Could not start task."
-        )
+        ) from e
 
 
 @router.get("/quotes", tags=["Searching"])
@@ -40,7 +40,7 @@ async def get_quotes(
     _db: Database = Depends(get_db),
     author: Optional[str] = Query(None, description="Filter quotes by author name."),
     tag: Optional[str] = Query(None, description="Filter quotes by a specific tag."),
-    search: Optional[str] = Query(None, description="Full-text search in quotes, authors, and tags."),
+    # search: Optional[str] = Query(None, description="Full-text search in quotes, authors, and tags."),
 ):
     "Get quotes with filtering"
     try:
@@ -50,8 +50,8 @@ async def get_quotes(
         if tag:
             filter_query["tags"] = tag.strip()
 
-        if search:
-            filter_query["$text"] = {"$search": search}
+        # if search:
+        #     filter_query["$text"] = {"$search": search}
 
         cursor = collection_name.find(filter_query)
         cursor = cursor.sort("time_added", -1)
@@ -68,13 +68,13 @@ async def get_quotes(
         logger.error(f"MongoDB connection failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service Unavailable: Database connection failed."
-        )
+        ) from e
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error: Failed to retrieve quotes.",
-        )
+        ) from e
 
 
 @router.get("/", tags=["Start Page"])
