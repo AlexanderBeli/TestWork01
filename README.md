@@ -38,7 +38,12 @@ docker compose down     # if you run by docker compose up --build -d
 
 ## Tests
 
+For local testing you can install libraries from `requirements.txt` using .venv and then run `pytest`.
+
 ```bash
+virtualenv .venv -p python3.13
+source .venv/bin/activate
+pip install -r requirements.txt
 pytest
 ```
 
