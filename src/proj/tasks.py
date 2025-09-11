@@ -4,6 +4,7 @@ from datetime import datetime
 
 import httpx
 from bs4 import BeautifulSoup
+from celery import Task
 
 from src.database.db import collection_name
 from src.database.models import Quote
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(name="start_parsing_task", bind=True)
-def start_parsing_task(self):
+def start_parsing_task(self: Task) -> dict[str, str | int]:
     """Celery task to scrape quotes from a website and save them to MongoDB."""
 
     quotes_url = "http://quotes.toscrape.com/"
@@ -51,10 +52,10 @@ def start_parsing_task(self):
                 page_number += 1
             except httpx.HTTPError as e:
                 logger.error(f"HTTP request error with httpx: {e}")
-                raise self.retry(exc=e, countdown=60)
+                raise self.retry(exc=e, countdown=60) from e
             except Exception as e:
                 logger.error(f"An error occurred during scraping on page {page_number}: {e}")
-                raise self.retry(exc=e, countdown=60)
+                raise self.retry(exc=e, countdown=60) from e
 
     logger.info(f"Finished scraping. Total quotes saved: {quotes_count}")
     return {"message": "Scraping completed", "quotes_saved": quotes_count}
