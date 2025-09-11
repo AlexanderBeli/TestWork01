@@ -75,16 +75,3 @@ async def get_quotes(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error: Failed to retrieve quotes.",
         ) from e
-
-
-@router.get("/", tags=["Start Page"])
-async def root() -> dict:
-    """Root endpoint with API information"""
-    return {
-        "message": "Quotes Scraper API",
-        "version": "1.0.0",
-        "endpoints": {
-            "POST /parse-quotes-task": "Start quotes parsing task",
-            "GET /quotes": "Get quotes with filtering",
-        },
-    }
