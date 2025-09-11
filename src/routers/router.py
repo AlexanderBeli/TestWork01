@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.post("/parse_quotes_task", tags=["Parsing"])
-async def parse_quotes_task(_db: Database = Depends(get_db)) -> dict[str, str]:
+async def parse_quotes_task(_db: Database = Depends(get_db)) -> dict[str, str]:  # noqa: B008
     "Start quotes parsing task"
     try:
         # Call the Celery task and get the task ID
@@ -37,7 +37,7 @@ async def parse_quotes_task(_db: Database = Depends(get_db)) -> dict[str, str]:
 
 @router.get("/quotes", tags=["Searching"])
 async def get_quotes(
-    _db: Database = Depends(get_db),
+    _db: Database = Depends(get_db),  # noqa: B008
     author: Optional[str] = Query(None, description="Filter quotes by author name."),
     tag: Optional[str] = Query(None, description="Filter quotes by a specific tag."),
     # search: Optional[str] = Query(None, description="Full-text search in quotes, authors, and tags."),
