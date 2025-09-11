@@ -22,12 +22,14 @@ httptools==0.6.4
 httpx==0.28.1
 humanize==4.13.0
 idna==3.10
+iniconfig==2.1.0
 Jinja2==3.1.6
 kombu==5.5.4
 markdown-it-py==4.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
 packaging==25.0
+pluggy==1.6.0
 prometheus_client==0.22.1
 prompt_toolkit==3.0.52
 pydantic==2.11.7
@@ -35,6 +37,7 @@ pydantic-settings==2.10.1
 pydantic_core==2.33.2
 Pygments==2.19.2
 pymongo==4.14.1
+pytest==8.4.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 python-multipart==0.0.20
