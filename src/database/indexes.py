@@ -8,7 +8,7 @@ from src.logger import logging
 logger = logging.getLogger(__name__)
 
 
-def create_indexes():
+def create_indexes() -> None:
     """Create indexes for the quotes collection."""
     try:
         # Simple indexes
@@ -34,7 +34,7 @@ def create_indexes():
         raise
 
 
-def ensure_indexes():
+def ensure_indexes() -> None:
     """Ensure indexes exist, create if they don't."""
     try:
         existing_indexes = [index["name"] for index in collection_name.list_indexes()]
