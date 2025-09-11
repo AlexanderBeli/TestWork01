@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # Logging settings
     LOG_LEVEL: str = "INFO" if TESTING_FLAG else os.getenv("LOG_LEVEL", "INFO")
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: str | int | bool | None) -> None:
         super().__init__(**kwargs)
         if self.REDIS_SSL:
             protocol = "rediss"
