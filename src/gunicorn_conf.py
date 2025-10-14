@@ -34,8 +34,8 @@ errorlog: str = "-"
 loglevel: str = "info"
 
 # Worker lifecycle management
-max_requests: int = 1000
-max_requests_jitter: int = 50
+max_requests: int = 5000
+max_requests_jitter: int = 250
 
 # Performance optimization
 preload_app: bool = True  # Load app before forking (saves memory)

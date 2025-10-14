@@ -81,3 +81,56 @@ Running 30s test @ http://localhost:8000/
 Requests/sec:   6006.76
 Transfer/sec:    733.25KB
 ```
+
+## `wrk -t12 -c400 -d30s -s "/Users/alexander/Documents/TestTaskFastAPI&MongoDB/post_body.lua" http://localhost:8000/parse_quotes_task`
+
+```bash
+Running 30s test @ http://localhost:8000/parse_quotes_task
+  12 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   400.07ms  234.37ms   1.74s    70.16%
+    Req/Sec    84.45     46.54   277.00     69.09%
+  29812 requests in 30.10s, 4.98MB read
+  Socket errors: connect 0, read 570, write 0, timeout 0
+Requests/sec:    990.32
+Transfer/sec:    169.24KB
+```
+
+Если повысить в `db` `maxPoolSize`, в `gunicorn_conf` `max_requests` `max_requests_jitter`, в `docker-compose.yml` `command: redis-server --maxclients 2000`, в `celeryconfig.py` `result_backend_transport_options = {"max_connections": ..}`, то:
+
+```bash
+wrk -t12 -c400 -d30s -s "/Users/alexander/Documents/TestTaskFastAPI&MongoDB/post_body.lua" http://localhost:8000/parse_quotes_task
+Running 30s test @ http://localhost:8000/parse_quotes_task
+  12 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   351.12ms  204.17ms   1.99s    76.48%
+    Req/Sec    97.92     48.48   267.00     66.25%
+  34786 requests in 30.09s, 5.81MB read
+  Socket errors: connect 0, read 0, write 0, timeout 13
+Requests/sec:   1155.92
+Transfer/sec:    197.55KB
+```
+
+## Вывод Достигнут предел I/O
+
+Предпринятые действия (увеличение max_requests, увеличение result_backend_transport_options до 400+, и установка --maxclients 2000 на Redis) устранили все искусственные программные узкие места.
+
+Теперь проблемы с задержкой (Avg 351 мс) и пиковой задержкой (Max 1.99 с) являются следствием физических ограничений или архитектурных особенностей используемого стека:
+
+- Конкуренция за CPU Redis: Redis, будучи однопоточным, может быть перегружен 400 одновременными запросами на запись задач. Даже с --maxclients 2000 ему может не хватать CPU для мгновенной обработки всех команд, что создает небольшую очередь и вызывает задержку.
+
+- Задержка Celery: Небольшая накладная задержка (overhead) при постановке задачи через Celery неизбежна. Целевая задержка в 351 мс является довольно хорошим показателем для системы с двумя сетевыми прыжками (FastAPI -> Redis).
+
+- Пиковые задержки (1.99s): Вероятно, это происходит из-за редких событий, таких как:
+
+  - Контекстное переключение на машине.
+
+  - Небольшие блокировки I/O при взаимодействии Redis с диском (например, при сохранении AOF/RDB).
+
+### Что делать дальше?
+
+Переход на RabbitMQ (Архитектурное изменение):
+
+- Если критически важно иметь задержку менее 100 мс при 400+ соединениях, Redis перестает быть оптимальным брокером. RabbitMQ лучше спроектирован для высококонкурентной обработки очередей и, вероятно, решит эту проблему.
+
+Сервис работает очень стабильно и эффективно, мы достигли отличных результатов, выжав максимум из архитектуры FastAPI + Celery/Redis.

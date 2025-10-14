@@ -18,7 +18,7 @@ enable_utc = True
 
 # result backend settings
 result_expires = 3600
-result_backend_transport_options = {"max_connections": 20}
+result_backend_transport_options = {"max_connections": 400}
 
 # worker perfomance settings
 worker_prefetch_multiplier = 1

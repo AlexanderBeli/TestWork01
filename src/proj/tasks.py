@@ -6,7 +6,7 @@ import httpx
 from bs4 import BeautifulSoup
 from celery import Task
 
-from src.database.db import collection_name
+from src.database.celery_db import collection_name
 from src.database.models import Quote
 from src.logger import logging
 from src.proj.celery import app

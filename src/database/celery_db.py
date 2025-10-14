@@ -1,10 +1,10 @@
-"""Database connection."""
+"""Database connection for Celery."""
 
-from pymongo import AsyncMongoClient
+from pymongo import MongoClient
 
 from config import settings
 
-client = AsyncMongoClient(
+client = MongoClient(
     settings.MONGODB_URL, maxPoolSize=100, minPoolSize=10, connectTimeoutMS=5000, serverSelectionTimeoutMS=5000
 )
 

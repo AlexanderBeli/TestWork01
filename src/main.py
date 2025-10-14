@@ -21,13 +21,13 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         # client.admin.command("ping")
         # logging.info("✅ MongoDB connection verified")
-        ensure_indexes()
+        await ensure_indexes()
         logger.info("✅ MongoDB indexes ensured")
     except Exception as e:
         logger.error(f"❌ MongoDB connection failed: {e}")
         raise e
     yield
-    client.close()
+    await client.close()
     logger.info("🔴 MongoDB disconnected")
 
 
