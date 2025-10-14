@@ -21,4 +21,4 @@ COPY ./src /app
 
 RUN ln -s /app /app/src
 
-CMD ["/bin/bash"]
+CMD ["gunicorn", "-c", "gunicorn_conf.py", "main:app"]
