@@ -19,14 +19,16 @@ logger = logging.getLogger(__name__)
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan."""
     try:
-        client.admin.command("ping")
-        logging.info("✅ MongoDB connection verified")
+        # client.admin.command("ping")
+        # logging.info("✅ MongoDB connection verified")
         ensure_indexes()
+        logger.info("✅ MongoDB indexes ensured")
     except Exception as e:
         logger.error(f"❌ MongoDB connection failed: {e}")
+        raise e
     yield
     client.close()
-    logging.info("🔴 MongoDB disconnected")
+    logger.info("🔴 MongoDB disconnected")
 
 
 app = FastAPI(title="Quotes Scraper API", version="1.0.0", lifespan=lifespan)
