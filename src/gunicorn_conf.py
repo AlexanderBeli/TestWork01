@@ -1,7 +1,9 @@
 """Gunicorn configuration for production FastAPI deployment."""
 
 import multiprocessing
-from typing import Any
+
+from gunicorn.arbiter import Arbiter
+from gunicorn.workers.base import Worker
 
 from logger import setup_logging
 
@@ -40,26 +42,26 @@ preload_app: bool = True  # Load app before forking (saves memory)
 
 
 # Lifecycle hooks
-def on_starting(_server: Any) -> None:
+def on_starting(_server: Arbiter) -> None:
     """Called just before the master process is initialized."""
     logger.info("🚀 Gunicorn master process starting...")
 
 
-def when_ready(_server: Any) -> None:
+def when_ready(_server: Arbiter) -> None:
     """Called just after the server is started."""
     logger.info(f"✅ Gunicorn ready with {workers} workers on {bind}")
 
 
-def on_reload(_server: Any) -> None:
+def on_reload(_server: Arbiter) -> None:
     """Called to recycle workers during a reload via SIGHUP."""
     logger.info("🔄 Gunicorn reloading workers...")
 
 
-def worker_int(worker: Any) -> None:
+def worker_int(worker: Worker) -> None:
     """Called when a worker receives the SIGINT or SIGQUIT signal."""
     logger.info(f"⚠️  Worker {worker.pid} received interrupt signal")
 
 
-def on_exit(_server: Any) -> None:
+def on_exit(_server: Arbiter) -> None:
     """Called just before the master process exits."""
     logger.info("🔴 Gunicorn shutting down gracefully...")
