@@ -111,7 +111,53 @@ Requests/sec:   1155.92
 Transfer/sec:    197.55KB
 ```
 
-## Вывод Достигнут предел I/O
+## Финальные тесты
+
+- redirection
+
+```bash
+wrk -t12 -c400 -d30s http://localhost:8000/
+Running 30s test @ http://localhost:8000/
+  12 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    62.72ms   64.23ms 667.47ms   87.52%
+    Req/Sec   658.96    347.70     1.99k    66.62%
+  236132 requests in 30.04s, 28.15MB read
+  Socket errors: connect 0, read 466, write 0, timeout 0
+Requests/sec:   7860.64
+Transfer/sec:      0.94MB
+```
+
+- POST method
+
+```bash
+wrk -t12 -c400 -d30s -s "/Users/alexander/Documents/TestTaskFastAPI&MongoDB/post_body.lua" http://localhost:8000/parse_quotes_task
+Running 30s test @ http://localhost:8000/parse_quotes_task
+  12 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   351.12ms  204.17ms   1.99s    76.48%
+    Req/Sec    97.92     48.48   267.00     66.25%
+  34786 requests in 30.09s, 5.81MB read
+  Socket errors: connect 0, read 0, write 0, timeout 13
+Requests/sec:   1155.92
+Transfer/sec:    197.55KB
+```
+
+- GET method - query, at the same time Celery tasks were been processed
+
+```bash
+wrk -t12 -c400 -d30s "http://localhost:8000/quotes?author=Albert%20Einstein&limit=25&skip=0"
+Running 30s test @ http://localhost:8000/quotes?author=Albert%20Einstein&limit=25&skip=0
+  12 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   201.56ms  153.13ms   1.51s    73.13%
+    Req/Sec   179.71     84.69   510.00     70.22%
+  64001 requests in 30.05s, 385.53MB read
+Requests/sec:   2129.53
+Transfer/sec:     12.83MB
+```
+
+# Вывод Достигнут предел I/O
 
 Предпринятые действия (увеличение max_requests, увеличение result_backend_transport_options до 400+, и установка --maxclients 2000 на Redis) устранили все искусственные программные узкие места.
 

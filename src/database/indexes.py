@@ -49,11 +49,10 @@ async def ensure_indexes() -> None:
     """Ensure indexes exist, create if they don't."""
     try:
         # existing_indexes = [index["name"] async for index in await collection_name.list_indexes().to_list()]
-        existing_indexes = []
+        # existing_indexes = []
 
         indexes_cursor = await collection_name.list_indexes()
-        async for index in indexes_cursor:
-            existing_indexes.append(index["name"])
+        existing_indexes = [index["name"] async for index in indexes_cursor]
 
         # required_indexes = ["author_index", "tags_index", "time_added_index", "author_tags_compound_index"]
         missing_index = False
